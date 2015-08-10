@@ -79,6 +79,9 @@ class ViewController: UIViewController {
         // get shares wanted
         let sharesNumber = 1;
         
+        // protype
+        var ownedShares :Int = 0
+        
         // declare exists
         var exist :Bool = false
         
@@ -97,7 +100,7 @@ class ViewController: UIViewController {
             for result in results as! [NSManagedObject] {
                 if result.valueForKey("symbol") as! String == symbol {
                     exist = true
-                    print(exist)
+                    ownedShares = result.valueForKey("shares") as! Int
                 }
             }
             }
@@ -127,7 +130,26 @@ class ViewController: UIViewController {
         }
         
         if exist == true {
-            let updateShare = NSEntityDescription.
+            let fetchRequest = NSFetchRequest(entityName: "Shares")
+            fetchRequest.predicate = NSPredicate(format: "symbol = %@", symbol)
+            
+            do {
+                if let fetchResults = try appDel.managedObjectContext.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                    if fetchResults.count != 0{
+                        
+                        let managedObject = fetchResults[0]
+                        managedObject.setValue(sharesNumber + ownedShares, forKey: "shares")
+                        
+                        do {
+                            try context.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }
+            } catch {
+                print(error)
+            }
         }
     }
     
