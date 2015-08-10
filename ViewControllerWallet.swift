@@ -10,34 +10,34 @@ import UIKit
 import Foundation
 import CoreData
 
-class ViewControllerWallet: UIViewController, UITableViewDelegate {
-
-    
+class ViewControllerWallet: UIViewController {
     
     @IBOutlet weak var sharesList: UITableView!
     
-    var resultsArray = [String]()
+    var resultsArray: NSMutableArray! = NSMutableArray()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
-        return resultsArray.count
+        return self.resultsArray.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cell = UITableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: "cell")
-        cell.textLabel?.text = resultsArray[indexPath.row]
+        let cell = self.sharesList.dequeueReusableCellWithIdentifier("share", forIndexPath: indexPath) as! WalletCell
+        cell.nameShares.text = self.resultsArray.objectAtIndex(indexPath.row) as? String
+        cell.numberShares.text = "12"
         return cell
     }
     
     override func viewDidAppear(animated: Bool) {
         
-        resultsArray = [String]()
+        resultsArray = NSMutableArray()
         
         let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let context :NSManagedObjectContext = appDel.managedObjectContext
@@ -50,7 +50,7 @@ class ViewControllerWallet: UIViewController, UITableViewDelegate {
             
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
-                    resultsArray.append(result.valueForKey("symbol") as! String)
+                    self.resultsArray.addObject(result.valueForKey("symbol") as! String)
                 }
             }
             
@@ -58,9 +58,8 @@ class ViewControllerWallet: UIViewController, UITableViewDelegate {
             print(error)
         }
         
-        
         self.sharesList.reloadData()
-        print("did reload \(resultsArray)")
+
     }
 
     override func didReceiveMemoryWarning() {

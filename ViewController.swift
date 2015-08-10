@@ -122,8 +122,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             let request = NSFetchRequest(entityName: "Shares")
             do {
-                let result = try context.executeFetchRequest(request)
-                print(result)
+                let _ = try context.executeFetchRequest(request)
             } catch {
                 print("Unable to print")
             }
