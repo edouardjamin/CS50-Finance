@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var symbolField: UITextField!
     
@@ -176,11 +176,23 @@ class ViewController: UIViewController {
     }
     
     
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
+    func textFieldShouldReturn(textField :UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        self.symbolField.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
