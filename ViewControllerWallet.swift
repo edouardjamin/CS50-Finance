@@ -14,7 +14,8 @@ class ViewControllerWallet: UIViewController {
     
     @IBOutlet weak var sharesList: UITableView!
     
-    var resultsArray: NSMutableArray! = NSMutableArray()
+    var sharesArray :NSMutableArray! = NSMutableArray()
+    var numberArray = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,20 +25,22 @@ class ViewControllerWallet: UIViewController {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
-        return self.resultsArray.count
+        return self.sharesArray.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let cell = self.sharesList.dequeueReusableCellWithIdentifier("share", forIndexPath: indexPath) as! WalletCell
-        cell.nameShares.text = self.resultsArray.objectAtIndex(indexPath.row) as? String
-        cell.numberShares.text = "12"
+        cell.nameShares.text = self.sharesArray.objectAtIndex(indexPath.row) as? String
+        print(numberArray[1])
+        cell.numberShares.text = self.numberArray[indexPath.row] as! String
         return cell
     }
     
     override func viewDidAppear(animated: Bool) {
         
-        resultsArray = NSMutableArray()
+        sharesArray = NSMutableArray()
+        numberArray = [String]()
         
         let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let context :NSManagedObjectContext = appDel.managedObjectContext
@@ -50,8 +53,14 @@ class ViewControllerWallet: UIViewController {
             
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
-                    self.resultsArray.addObject(result.valueForKey("symbol") as! String)
+                    self.sharesArray.addObject(result.valueForKey("symbol") as! String)
+                    let numberNumber :NSNumber = result.valueForKey("shares")! as! NSNumber
+                    self.numberArray.append(String(numberNumber))
                 }
+                
+                
+                
+                
             }
             
         } catch {
