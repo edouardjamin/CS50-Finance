@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class ViewControllerSell: UIViewController {
+class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     
     @IBOutlet weak var shareSymbol: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
@@ -17,13 +17,27 @@ class ViewControllerSell: UIViewController {
     @IBOutlet weak var sharesLabel: UILabel!
     
     
+    @IBOutlet weak var sharePicker: UIPickerView!
 
     @IBAction func backButton(sender: AnyObject) {
     }
     
     
+    //MARK  -Outlets and properties
+    var pickerData = [String]()
+    
+    enum PickerComponent :Int{
+        case size = 0
+    }
+    
+    @IBOutlet weak var myLabel: UILabel!
+    @IBOutlet weak var myPicker: UIPickerView!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        var number :Double = 0.00
         
         _ = lookup(shareSelected) { name, symbol, price in
             dispatch_async(dispatch_get_main_queue()) {
@@ -38,7 +52,6 @@ class ViewControllerSell: UIViewController {
         let request = NSFetchRequest(entityName: "Shares")
         request.returnsObjectsAsFaults = false
         
-        var number = 0
         
         do {
             let results = try context.executeFetchRequest(request)
@@ -46,8 +59,8 @@ class ViewControllerSell: UIViewController {
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
                     if result.valueForKey("symbol") as! String == shareSelected {
-                        number = result.valueForKey("shares")! as! Int
-                        self.numberLabel.text = String(number)
+                        number = result.valueForKey("shares")! as! Double
+                        self.numberLabel.text = String(Int(number))
                     }
                 }
             }
@@ -57,13 +70,107 @@ class ViewControllerSell: UIViewController {
         
         _ = price(shareSelected) { price in
             dispatch_async(dispatch_get_main_queue()) {
-                print(price)
+                let worthInt = price * number
+                let worth = String(worthInt)
+                self.sharesLabel.text = "$\(worth)"
             }
         }
         
+        for var i :Int = 1; i <= Int(number); i++ {
+            self.pickerData.append("\(i)")
+        }
         
+        sharePicker.delegate = self
+        sharePicker.dataSource = self
+        sharePicker.selectRow(0, inComponent: PickerComponent.size.rawValue, animated: false)
         
     }
+    //MARK -Delgates and DataSource
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    }
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return pickerData.count
+    }
+    
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+        return pickerData[row]
+    }
+    
+    @IBAction func sellBouton(sender: AnyObject) {
+        let sharesSell = pickerData[sharePicker.selectedRowInComponent(0)]
+        var ownedShares :Int = 0
+        
+        let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context :NSManagedObjectContext = appDel.managedObjectContext
+        
+        let request = NSFetchRequest(entityName: "Shares")
+        request.returnsObjectsAsFaults = false
+        
+        do {
+            
+            let results = try context.executeFetchRequest(request)
+            
+            if results.count > 0 {
+                for result in results as! [NSManagedObject] {
+                    if result.valueForKey("symbol") as! String == shareSelected {
+                        ownedShares = result.valueForKey("shares") as! Int
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+        
+            // retreive value
+            let fetchRequest = NSFetchRequest(entityName: "Shares")
+            fetchRequest.predicate = NSPredicate(format: "symbol = %@", shareSelected)
+            
+            do {
+                if let fetchResults = try appDel.managedObjectContext.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                    if fetchResults.count != 0{
+                        
+                        let managedObject = fetchResults[0]
+                        managedObject.setValue(ownedShares - Int(sharesSell)!, forKey: "shares")
+                        
+                        do {
+                            try context.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        
+            // check if ownedShares = 0, and delete if so
+        
+        do {
+            
+            let results = try context.executeFetchRequest(request)
+            
+            if results.count > 0 {
+                for result in results as! [NSManagedObject] {
+                    if result.valueForKey("shares") as! Int == 0 {
+                        context.deleteObject(result)
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+        
+        // return home
+        self.performSegueWithIdentifier("sellToHome", sender: self)
+
+    
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -80,5 +187,6 @@ class ViewControllerSell: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
+
 
 }

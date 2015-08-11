@@ -63,9 +63,7 @@ func price(entry : NSString, completion: ((price :Double) -> Void)) {
     _ = lookup(shareSelected) { name, symbol, price in
         dispatch_async(dispatch_get_main_queue()) {
             let priceString :String = price
-            print(priceString)
             priceInt = NSString(string: priceString).doubleValue
-            print(priceInt)
             completion(price: priceInt)
         }
     }

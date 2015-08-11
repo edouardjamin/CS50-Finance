@@ -206,6 +206,9 @@
                                 <rect key="frame" x="0.0" y="629" width="375" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                 <state key="normal" title="Sell"/>
+                                <connections>
+                                    <action selector="sellBouton:" destination="bfc-Mp-374" eventType="touchUpInside" id="6sp-os-btN"/>
+                                </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="AAPL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RLw-FO-wy8">
                                 <rect key="frame" x="20" y="58" width="209" height="56"/>
@@ -257,7 +260,7 @@
                                 <state key="normal" title="Back"/>
                                 <connections>
                                     <action selector="backButton:" destination="bfc-Mp-374" eventType="touchUpInside" id="f7Q-k8-nj3"/>
-                                    <segue destination="cNc-wa-IIG" kind="show" id="8zU-GI-DJN"/>
+                                    <segue destination="cNc-wa-IIG" kind="show" identifier="sellToHome" id="8zU-GI-DJN"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -266,6 +269,7 @@
                     <connections>
                         <outlet property="numberLabel" destination="VzE-bU-lES" id="f0A-QJ-rfd"/>
                         <outlet property="priceLabel" destination="wFu-9d-uGc" id="J7q-Zt-CZX"/>
+                        <outlet property="sharePicker" destination="8Gm-nV-mQS" id="swx-yK-w8Q"/>
                         <outlet property="shareSymbol" destination="RLw-FO-wy8" id="ydM-7K-j0z"/>
                         <outlet property="sharesLabel" destination="NZE-78-2uD" id="Sxo-wi-g5e"/>
                     </connections>
