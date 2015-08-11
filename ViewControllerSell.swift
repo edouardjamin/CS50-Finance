@@ -30,9 +30,6 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
         case size = 0
     }
     
-    @IBOutlet weak var myLabel: UILabel!
-    @IBOutlet weak var myPicker: UIPickerView!
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -149,8 +146,7 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
             }
         
             // check if ownedShares = 0, and delete if so
-        
-        do {
+            do {
             
             let results = try context.executeFetchRequest(request)
             
@@ -158,6 +154,11 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
                 for result in results as! [NSManagedObject] {
                     if result.valueForKey("shares") as! Int == 0 {
                         context.deleteObject(result)
+                        do {
+                            try context.save()
+                        } catch {
+                            print(error)
+                        }
                     }
                 }
             }

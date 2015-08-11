@@ -38,6 +38,8 @@ class ViewControllerWallet: UIViewController {
         
         cell.minusButton.tag = indexPath.row
         cell.minusButton.addTarget(self, action: "sellAction:", forControlEvents: .TouchUpInside)
+        cell.plusButton.tag = indexPath.row
+        cell.plusButton.addTarget(self, action: "buyAction:", forControlEvents: .TouchUpInside)
         return cell
     }
     
@@ -85,8 +87,15 @@ class ViewControllerWallet: UIViewController {
     
     @IBAction func sellAction(sender: UIButton) {
         
-            shareSelected = self.sharesArray[sender.tag] as! String
-            self.performSegueWithIdentifier("sellView", sender: self)
+        shareSelected = self.sharesArray[sender.tag] as! String
+        self.performSegueWithIdentifier("sellView", sender: self)
+        
+    }
+    
+    @IBAction func buyAction(sender: UIButton) {
+        
+        shareSelected = self.sharesArray[sender.tag] as! String
+        self.performSegueWithIdentifier("buyView", sender: self)
         
     }
 

@@ -70,6 +70,86 @@ func price(entry : NSString, completion: ((price :Double) -> Void)) {
     
 }
 
+func buy(entry :NSString, number :Int) -> Void
+{
+    // get shares wanted
+    let sharesNumber = number;
+    
+    // protype
+    var ownedShares :Int = 0
+    
+    // declare exists
+    var exist :Bool = false
+    
+    let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    
+    let context :NSManagedObjectContext = appDel.managedObjectContext
+    
+    let request = NSFetchRequest(entityName: "Shares")
+    request.returnsObjectsAsFaults = false
+    
+    do {
+        
+        let results = try context.executeFetchRequest(request)
+        
+        if results.count > 0 {
+            for result in results as! [NSManagedObject] {
+                if result.valueForKey("symbol") as! String == entry {
+                    exist = true
+                    ownedShares = result.valueForKey("shares") as! Int
+                }
+            }
+        }
+    } catch {
+        print(error)
+    }
+    
+    if exist == false {
+        let newShare = NSEntityDescription.insertNewObjectForEntityForName("Shares", inManagedObjectContext: context)
+        
+        newShare.setValue(sharesNumber, forKey: "shares")
+        newShare.setValue(entry, forKey: "symbol")
+        
+        do {
+            try context.save()
+        } catch {
+            print("Unable to save")
+        }
+        
+        let request = NSFetchRequest(entityName: "Shares")
+        do {
+            let _ = try context.executeFetchRequest(request)
+        } catch {
+            print("Unable to print")
+        }
+    }
+    
+    if exist == true {
+        let fetchRequest = NSFetchRequest(entityName: "Shares")
+        fetchRequest.predicate = NSPredicate(format: "symbol = %@", entry)
+        
+        do {
+            if let fetchResults = try appDel.managedObjectContext.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                if fetchResults.count != 0{
+                    
+                    let managedObject = fetchResults[0]
+                    managedObject.setValue(sharesNumber + ownedShares, forKey: "shares")
+                    
+                    do {
+                        try context.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+    }
+
+    
+}
+
 class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var symbolField: UITextField!
@@ -98,83 +178,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBAction func buyButton(sender: AnyObject) {
         
         // get wanted symbol
-        let symbol = symbolField.text!
+        let wanted = symbolField.text!
+        buy(wanted, number: 1)
         
-        // get shares wanted
-        let sharesNumber = 1;
-        
-        // protype
-        var ownedShares :Int = 0
-        
-        // declare exists
-        var exist :Bool = false
-        
-        let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
-        let context :NSManagedObjectContext = appDel.managedObjectContext
-        
-        let request = NSFetchRequest(entityName: "Shares")
-        request.returnsObjectsAsFaults = false
-        
-        do {
-        
-        let results = try context.executeFetchRequest(request)
-        
-        if results.count > 0 {
-            for result in results as! [NSManagedObject] {
-                if result.valueForKey("symbol") as! String == symbol {
-                    exist = true
-                    ownedShares = result.valueForKey("shares") as! Int
-                }
             }
-            }
-            } catch {
-                print(error)
-            }
-        
-        if exist == false {
-            let newShare = NSEntityDescription.insertNewObjectForEntityForName("Shares", inManagedObjectContext: context)
-            
-            newShare.setValue(sharesNumber, forKey: "shares")
-            newShare.setValue(symbol, forKey: "symbol")
-            
-            do {
-                try context.save()
-            } catch {
-                print("Unable to save")
-            }
-            
-            let request = NSFetchRequest(entityName: "Shares")
-            do {
-                let _ = try context.executeFetchRequest(request)
-            } catch {
-                print("Unable to print")
-            }
-        }
-        
-        if exist == true {
-            let fetchRequest = NSFetchRequest(entityName: "Shares")
-            fetchRequest.predicate = NSPredicate(format: "symbol = %@", symbol)
-            
-            do {
-                if let fetchResults = try appDel.managedObjectContext.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
-                    if fetchResults.count != 0{
-                        
-                        let managedObject = fetchResults[0]
-                        managedObject.setValue(sharesNumber + ownedShares, forKey: "shares")
-                        
-                        do {
-                            try context.save()
-                        } catch {
-                            print(error)
-                        }
-                    }
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
     
     @IBAction func printButton(sender: AnyObject) {
         let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
