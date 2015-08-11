@@ -46,7 +46,7 @@ func lookup(entry : NSString, completion: ((name :String, symbol :String, price 
     task.resume()
 }
 
-func price(entry :NSString) -> Int {
+func price(entry : NSString, completion: ((price :Double) -> Void)) {
     
     /**
     *
@@ -57,18 +57,19 @@ func price(entry :NSString) -> Int {
     **/
     
     // initate return value
-    var priceInt :Int = 0
+    var priceInt :Double = 0
     
     // run lookup
     _ = lookup(shareSelected) { name, symbol, price in
         dispatch_async(dispatch_get_main_queue()) {
             let priceString :String = price
-            priceInt = Int(priceString)!
+            print(priceString)
+            priceInt = NSString(string: priceString).doubleValue
+            print(priceInt)
+            completion(price: priceInt)
         }
     }
-        
-    // return value
-    return priceInt
+    
 }
 
 class ViewController: UIViewController, UITextFieldDelegate {
@@ -224,7 +225,5 @@ class ViewController: UIViewController, UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
 
-
-}
 
 }

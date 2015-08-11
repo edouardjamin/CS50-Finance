@@ -38,20 +38,30 @@ class ViewControllerSell: UIViewController {
         let request = NSFetchRequest(entityName: "Shares")
         request.returnsObjectsAsFaults = false
         
+        var number = 0
+        
         do {
             let results = try context.executeFetchRequest(request)
             
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
                     if result.valueForKey("symbol") as! String == shareSelected {
-                        let number = String(result.valueForKey("shares")!)
-                        numberLabel.text = number
+                        number = result.valueForKey("shares")! as! Int
+                        self.numberLabel.text = String(number)
                     }
                 }
             }
         } catch {
             print(error)
         }
+        
+        _ = price(shareSelected) { price in
+            dispatch_async(dispatch_get_main_queue()) {
+                print(price)
+            }
+        }
+        
+        
         
     }
 

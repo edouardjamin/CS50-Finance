@@ -65,13 +65,9 @@ class ViewControllerWallet: UIViewController {
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
                     self.sharesArray.addObject(result.valueForKey("symbol") as! String)
-                    let numberNumber :NSNumber = result.valueForKey("shares")! as! NSNumber
+                    let numberNumber = result.valueForKey("shares")! as! NSNumber
                     self.numberArray.append(String(numberNumber))
                 }
-                
-                
-                
-                
             }
             
         } catch {
