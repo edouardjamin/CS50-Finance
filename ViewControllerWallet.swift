@@ -10,6 +10,8 @@ import UIKit
 import Foundation
 import CoreData
 
+var shareSelected = ""
+
 class ViewControllerWallet: UIViewController {
     
     @IBOutlet weak var sharesList: UITableView!
@@ -32,12 +34,21 @@ class ViewControllerWallet: UIViewController {
     {
         let cell = self.sharesList.dequeueReusableCellWithIdentifier("share", forIndexPath: indexPath) as! WalletCell
         cell.nameShares.text = self.sharesArray.objectAtIndex(indexPath.row) as? String
-        print(numberArray[1])
-        cell.numberShares.text = self.numberArray[indexPath.row] as! String
+        cell.numberShares.text = self.numberArray[indexPath.row]
+        
+        cell.minusButton.tag = indexPath.row
+        cell.minusButton.addTarget(self, action: "sellAction:", forControlEvents: .TouchUpInside)
         return cell
     }
     
     override func viewDidAppear(animated: Bool) {
+        
+        func tabBarIsVisible() ->Bool {
+            return self.tabBarController?.tabBar.frame.origin.y < CGRectGetMaxY(self.view.frame)
+        }
+        
+        print(tabBarIsVisible())
+        
         
         sharesArray = NSMutableArray()
         numberArray = [String]()
@@ -76,6 +87,13 @@ class ViewControllerWallet: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    @IBAction func sellAction(sender: UIButton) {
+        
+            shareSelected = self.sharesArray[sender.tag] as! String
+            self.performSegueWithIdentifier("sellView", sender: self)
+        
+    }
+
 
     /*
     // MARK: - Navigation

@@ -9,6 +9,68 @@
 import UIKit
 import CoreData
 
+func lookup(entry : NSString, completion: ((name :String, symbol :String, price :String) -> Void)) {
+    
+    /**
+    *
+    * WARNING
+    * In this function, everything (including the price) will be returned as a string. Use func price() if needed
+    * @0.1
+    *
+    **/
+    
+    // define return values
+    var name = String()
+    var symbol = String()
+    var price = String()
+    
+    // define URL
+    let url = NSURL(string: "http://yahoojson.gobu.fr/symbol.php?symbol=\(entry)")!
+    
+    let task = NSURLSession.sharedSession().dataTaskWithURL(url) { (data, response, error) in
+        if let urlContent = data {
+            do {
+                let jsonResult = try NSJSONSerialization.JSONObjectWithData(urlContent, options: NSJSONReadingOptions.MutableContainers)
+                
+                name = jsonResult["name"] as! String
+                symbol = jsonResult["symbol"] as! String
+                price = jsonResult["price"]!!.stringValue as String
+                completion(name: name, symbol: symbol, price: price)
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
+    // run the task
+    task.resume()
+}
+
+func price(entry :NSString) -> Int {
+    
+    /**
+    *
+    * WARNING
+    * This function needs lookup to work
+    * @0.1
+    *
+    **/
+    
+    // initate return value
+    var priceInt :Int = 0
+    
+    // run lookup
+    _ = lookup(shareSelected) { name, symbol, price in
+        dispatch_async(dispatch_get_main_queue()) {
+            let priceString :String = price
+            priceInt = Int(priceString)!
+        }
+    }
+        
+    // return value
+    return priceInt
+}
+
 class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var symbolField: UITextField!
@@ -16,43 +78,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var quoteLabel: UILabel!
     @IBOutlet weak var symbolLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
-    
-    func lookup(entry : NSString, completion: ((name :String, symbol :String, price :String) -> Void)) {
-        
-        /**
-        *
-        * WARNING
-        * In this function, everything (including the price) will be returned as a string. Use func price() if needed
-        * @0.1
-        *
-        **/
-        
-        // define return values
-        var name = String()
-        var symbol = String()
-        var price = String()
-        
-        // define URL
-        let url = NSURL(string: "http://yahoojson.gobu.fr/symbol.php?symbol=\(entry)")!
-        
-        let task = NSURLSession.sharedSession().dataTaskWithURL(url) { (data, response, error) in
-             if let urlContent = data {
-                do {
-                    let jsonResult = try NSJSONSerialization.JSONObjectWithData(urlContent, options: NSJSONReadingOptions.MutableContainers)
-                    
-                        name = jsonResult["name"] as! String
-                        symbol = jsonResult["symbol"] as! String
-                        price = jsonResult["price"]!!.stringValue as String
-                        completion(name: name, symbol: symbol, price: price)
-                } catch {
-                    print(error)
-                }
-            }
-        }
-        
-        // run the task
-        task.resume()
-    }
 
     // get quote button
     @IBAction func getQuote(sender: AnyObject) {
@@ -202,3 +227,4 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
 }
 
+}
