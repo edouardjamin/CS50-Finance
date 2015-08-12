@@ -70,7 +70,7 @@ func price(entry : NSString, completion: ((price :Double) -> Void)) {
     
 }
 
-func buy(entry :NSString, number :Int) -> Void
+func buy(entry :NSString, number :Int, price :Double) -> Void
 {
     // get shares wanted
     let sharesNumber = number;
@@ -81,15 +81,13 @@ func buy(entry :NSString, number :Int) -> Void
     // declare exists
     var exist :Bool = false
     
-    let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-    
-    let context :NSManagedObjectContext = appDel.managedObjectContext
-    
+    // connect to CoreData
+    let context = connectToCoreData()
     let request = NSFetchRequest(entityName: "Shares")
     request.returnsObjectsAsFaults = false
     
+    // check if shares already owned and if so, how many
     do {
-        
         let results = try context.executeFetchRequest(request)
         
         if results.count > 0 {
@@ -104,7 +102,36 @@ func buy(entry :NSString, number :Int) -> Void
         print(error)
     }
     
-    if exist == false {
+    // declare enough money
+    var enoughMoney :Bool = true
+    
+    // connect to CoreData
+    let requestCash = NSFetchRequest(entityName: "Users")
+    requestCash.returnsObjectsAsFaults = false
+    
+    // check cash
+    var currentCash = 0
+    do {
+        let results = try context.executeFetchRequest(requestCash)
+        
+        if results.count > 0 {
+            for result in results as! [NSManagedObject] {
+                currentCash = result.valueForKey("cash") as! Int
+            }
+        }
+        
+    } catch {
+        print(error)
+    }
+    
+    // check enough cash
+    if Int(price) * sharesNumber > currentCash {
+        enoughMoney = false
+    }
+    
+    
+    // if no shares owned
+    if exist == false && enoughMoney == true {
         let newShare = NSEntityDescription.insertNewObjectForEntityForName("Shares", inManagedObjectContext: context)
         
         newShare.setValue(sharesNumber, forKey: "shares")
@@ -122,14 +149,16 @@ func buy(entry :NSString, number :Int) -> Void
         } catch {
             print("Unable to print")
         }
+        spend(price * Double(sharesNumber))
     }
     
-    if exist == true {
+    // if shares owned
+    if exist == true && enoughMoney == true {
         let fetchRequest = NSFetchRequest(entityName: "Shares")
         fetchRequest.predicate = NSPredicate(format: "symbol = %@", entry)
         
         do {
-            if let fetchResults = try appDel.managedObjectContext.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+            if let fetchResults = try context.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
                 if fetchResults.count != 0{
                     
                     let managedObject = fetchResults[0]
@@ -145,9 +174,8 @@ func buy(entry :NSString, number :Int) -> Void
         } catch {
             print(error)
         }
+        spend(price * Double(sharesNumber))
     }
-
-    
 }
 
 func connectToCoreData() -> NSManagedObjectContext
@@ -273,7 +301,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func addCash(sender: AnyObject) {
         
-        earn(10000)
+        earn(1000)
         
         let context = connectToCoreData()
         let request = NSFetchRequest(entityName: "Users")
@@ -308,7 +336,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
 
     @IBAction func removeCash(sender: AnyObject) {
-        spend(10000)
+        spend(1000)
         
         let context = connectToCoreData()
         let request = NSFetchRequest(entityName: "Users")
@@ -345,8 +373,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBAction func buyButton(sender: AnyObject) {
         
         // get wanted symbol
-        let wanted = symbolField.text!
-        buy(wanted, number: 1)
+        let symbol = symbolField.text!
+        
+        // get price of share
+        var priceShare :Double = 0
+        _ = lookup(symbol) { name, symbol, price in
+            dispatch_async(dispatch_get_main_queue()) {
+                priceShare = Double(price)!
+                buy(symbol, number: 1, price: priceShare)
+            }
+        }
+        
         
             }
     

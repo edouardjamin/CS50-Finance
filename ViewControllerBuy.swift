@@ -15,29 +15,36 @@ class ViewControllerBuy: UIViewController {
     var wanted :Int = 0
     var priceShare :Double = 0
     
+    // interface protype
     @IBOutlet weak var symbolLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
     @IBOutlet weak var sharesLabel: UILabel!
     @IBOutlet weak var worthLabel: UILabel!
-
     @IBOutlet weak var sharesBuy: UILabel!
-    
     @IBOutlet weak var worthBuy: UILabel!
-    
     @IBOutlet weak var sharesStepper: UIStepper!
     
+    // buy button
     @IBAction func buyButton(sender: AnyObject) {
         
-        buy(shareSelected, number: wanted)
+        var price :Double = 0
+        
+        buy(shareSelected, number: wanted, price: price)
         let spendAmount = Double(wanted) * priceShare
         spend(spendAmount)
+        
+        // back to home
         self.performSegueWithIdentifier("back", sender: self)
     }
     
+    // back button
     @IBAction func backButton(sender: AnyObject) {
         self.performSegueWithIdentifier("buyToHome", sender: self)
     }
     override func viewDidLoad() {
+        /**
+        * Start of viewDidLoad
+        **/
         super.viewDidLoad()
         
         // stepper configs
@@ -45,8 +52,7 @@ class ViewControllerBuy: UIViewController {
         sharesStepper.autorepeat = true
         sharesStepper.maximumValue = 99
         
-        var number :Double = 0.00
-        
+        // run lookup and update symbol and price label
         _ = lookup(shareSelected) { name, symbol, price in
             dispatch_async(dispatch_get_main_queue()) {
                 self.symbolLabel.text = symbol
@@ -54,13 +60,15 @@ class ViewControllerBuy: UIViewController {
             }
         }
         
-        let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let context :NSManagedObjectContext = appDel.managedObjectContext
-        
+        // connect to Shares Entity
+        let context = connectToCoreData()
         let request = NSFetchRequest(entityName: "Shares")
         request.returnsObjectsAsFaults = false
         
+        // protype (number = number of shares owned)
+        var number :Double = 0.00
         
+        // update sharesLabel
         do {
             let results = try context.executeFetchRequest(request)
             
@@ -76,6 +84,7 @@ class ViewControllerBuy: UIViewController {
             print(error)
         }
         
+        // run price() and update worthLabel
         _ = price(shareSelected) { price in
             dispatch_async(dispatch_get_main_queue()) {
                 let worthInt = price * number
@@ -84,12 +93,13 @@ class ViewControllerBuy: UIViewController {
                 self.worthLabel.text = "$\(worth)"
             }
         }
-
-
-        // Do any additional setup after loading the view.
+        
+        /**
+        * End of viewDidLoad
+        **/
     }
     
-    // stepper changed
+    // check stepper change
     @IBAction func stepperChanged(sender: UIStepper) {
         
         self.sharesBuy.text = Int(sender.value).description
