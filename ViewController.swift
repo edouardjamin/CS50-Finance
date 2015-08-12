@@ -150,6 +150,15 @@ func buy(entry :NSString, number :Int) -> Void
     
 }
 
+func connectToCoreData() -> NSManagedObjectContext
+{
+    let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    
+    let context :NSManagedObjectContext = appDel.managedObjectContext
+    
+    return context
+}
+
 class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var symbolField: UITextField!
@@ -157,6 +166,100 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var quoteLabel: UILabel!
     @IBOutlet weak var symbolLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
+    @IBOutlet weak var cashLabel: UILabel!
+    
+    @IBAction func addCash(sender: AnyObject) {
+        let context = connectToCoreData()
+        
+        let request = NSFetchRequest(entityName: "Users")
+        request.returnsObjectsAsFaults = false
+        
+        var exist :Bool = false
+        var currentCash :Double = 0.00
+        
+        do {
+            let results = try context.executeFetchRequest(request)
+            for result in results as! [NSManagedObject] {
+                if result.valueForKey("cash") != nil {
+                    exist = true
+                    currentCash = result.valueForKey("cash") as! Double
+                }
+            }
+        } catch {
+                print(error)
+        }
+        
+        if exist == false
+        {
+            let newShare = NSEntityDescription.insertNewObjectForEntityForName("Users", inManagedObjectContext: context)
+        
+            newShare.setValue(10000.00, forKey: "cash")
+        
+            do {
+                try context.save()
+            } catch {
+                print("Unable to save")
+            }
+        }
+        
+        if exist == true
+        {
+            let fetchRequest = NSFetchRequest(entityName: "Users")
+            
+            do {
+                if let fetchResults = try context.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                    if fetchResults.count != 0 {
+                        
+                        let managedObject = fetchResults[0]
+                        let newCash = currentCash + 10000
+                        managedObject.setValue(newCash, forKey: "cash")
+                        
+                        do {
+                            try context.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }
+            } catch {
+                print(error)
+            }
+            
+        do {
+            let results = try context.executeFetchRequest(request)
+            for result in results as! [NSManagedObject] {
+                    cashLabel.text = String(result.valueForKey("cash")!)
+            }
+        } catch {
+            print(error)
+        }
+            
+            
+            
+        }
+    }
+    
+    @IBAction func printCash(sender: AnyObject) {
+        
+        let context = connectToCoreData()
+        
+        let fetchRequest = NSFetchRequest(entityName: "Users")
+        fetchRequest.returnsObjectsAsFaults = false
+        
+        do {
+            let results = try context.executeFetchRequest(fetchRequest)
+            for result in results as! [NSManagedObject] {
+                print(result.valueForKey("cash")!)
+            }
+        } catch {
+            print(error)
+        }
+    }
+    
+
+    @IBAction func removeCash(sender: AnyObject) {
+    }
+    
 
     // get quote button
     @IBAction func getQuote(sender: AnyObject) {
@@ -223,6 +326,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         self.symbolField.delegate = self
+        
+        // update cashLabel as soon as loaded
+        let context = connectToCoreData()
+        let fetchRequest = NSFetchRequest(entityName: "Users")
+        fetchRequest.returnsObjectsAsFaults = false
+        
+        do {
+            let results = try context.executeFetchRequest(fetchRequest)
+            for result in results as! [NSManagedObject] {
+                cashLabel.text = String(result.valueForKey("cash")!)
+            }
+        } catch {
+            print(error)
+        }
     }
 
     override func didReceiveMemoryWarning() {
