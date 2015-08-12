@@ -71,8 +71,8 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aWL-Rf-SFW">
-                                <rect key="frame" x="24" y="177" width="93" height="30"/>
-                                <state key="normal" title="Add $10, 000"/>
+                                <rect key="frame" x="24" y="177" width="84" height="30"/>
+                                <state key="normal" title="Add $1, 000"/>
                                 <connections>
                                     <action selector="addCash:" destination="BYZ-38-t0r" eventType="touchUpInside" id="j4b-Jg-bVp"/>
                                 </connections>
@@ -84,8 +84,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eAg-hR-8k2">
-                                <rect key="frame" x="235" y="177" width="120" height="30"/>
-                                <state key="normal" title="Remove $10, 000"/>
+                                <rect key="frame" x="235" y="177" width="111" height="30"/>
+                                <state key="normal" title="Remove $1, 000"/>
                                 <connections>
                                     <action selector="removeCash:" destination="BYZ-38-t0r" eventType="touchUpInside" id="CpD-69-wWt"/>
                                 </connections>
@@ -97,6 +97,43 @@
                                     <action selector="printCash:" destination="BYZ-38-t0r" eventType="touchUpInside" id="e1m-p0-qtf"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3V0-dL-U2e">
+                                <rect key="frame" x="313" y="208" width="33" height="30"/>
+                                <state key="normal" title="Alert"/>
+                                <connections>
+                                    <action selector="alertButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nih-RW-hrp"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Wallet" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sL7-Jh-IZC">
+                                <rect key="frame" x="0.0" y="300" width="375" height="68"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="35"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Total" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WFd-IM-zRv">
+                                <rect key="frame" x="0.0" y="376" width="375" height="68"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="35"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="cash" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sst-wP-YGG">
+                                <rect key="frame" x="32" y="263" width="37" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="wallet" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="brg-6U-he5">
+                                <rect key="frame" x="32" y="323" width="45" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="total" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9S3-9U-zEO">
+                                <rect key="frame" x="32" y="399" width="34" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -116,6 +153,8 @@
                         <outlet property="searchDisplayController" destination="k1z-7R-hdj" id="ma8-Rx-hgg"/>
                         <outlet property="symbolField" destination="sli-8d-VV5" id="w6a-EP-lft"/>
                         <outlet property="symbolLabel" destination="BQE-WY-bQr" id="eAk-Cp-pL9"/>
+                        <outlet property="totalLabel" destination="WFd-IM-zRv" id="Dhc-3L-b4j"/>
+                        <outlet property="walletLabel" destination="sL7-Jh-IZC" id="NKh-I0-63i"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

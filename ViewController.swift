@@ -176,6 +176,12 @@ func buy(entry :NSString, number :Int, price :Double) -> Void
         }
         spend(price * Double(sharesNumber))
     }
+    
+    // alert if not enough money
+    if enoughMoney == false {
+        alert("Bankrupt", message: "You need more money to buy more \(entry) share(s)")
+    }
+
 }
 
 func connectToCoreData() -> NSManagedObjectContext
@@ -289,6 +295,15 @@ func spend(amount :Double) -> Void
         }
 }
 
+func alert(title :String, message :String) -> Void
+{
+    let alert = UIAlertView()
+    alert.title = title
+    alert.message = message
+    alert.addButtonWithTitle("Understod")
+    alert.show()
+}
+
 
 class ViewController: UIViewController, UITextFieldDelegate {
 
@@ -299,6 +314,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var priceLabel: UILabel!
     @IBOutlet weak var cashLabel: UILabel!
     
+    @IBOutlet weak var walletLabel: UILabel!
+    
+    @IBOutlet weak var totalLabel: UILabel!
+    @IBAction func alertButton(sender: AnyObject) {
+        alert("Alert", message: "This is an alert")
+    }
     @IBAction func addCash(sender: AnyObject) {
         
         earn(1000)
@@ -424,9 +445,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        /**
+        * Start of viewDidLoad
+        **/
         
         self.symbolField.delegate = self
+        
+        
+        /**
+        * End of viewDidLoad
+        **/
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        
+        // protype
+        var currentCash :Int = 0
         
         // update cashLabel as soon as loaded
         let context = connectToCoreData()
@@ -436,10 +470,46 @@ class ViewController: UIViewController, UITextFieldDelegate {
         do {
             let results = try context.executeFetchRequest(fetchRequest)
             for result in results as! [NSManagedObject] {
-                cashLabel.text = String(result.valueForKey("cash")!)
+                currentCash = result.valueForKey("cash") as! Int
+                cashLabel.text = String(currentCash)
             }
         } catch {
             print(error)
+        }
+        
+        // update walletLabel as soon as loaded
+        let requestShares = NSFetchRequest(entityName: "Shares")
+        
+        var ownedShares = [String]()
+        var manyShares = [Int]()
+        var worth = [Double]()
+        var worthAdd :Double = 0
+        
+        do {
+            let results = try context.executeFetchRequest(requestShares)
+            for result in results as! [NSManagedObject] {
+                ownedShares.append(result.valueForKey("symbol") as! String)
+                manyShares.append(result.valueForKey("shares") as! Int)
+            }
+        } catch {
+            print(error)
+        }
+        
+        for var i :Int = 0; i < ownedShares.count; i++ {
+            let looked = ownedShares[i]
+            let numbered = Double(manyShares[i])
+            
+            _ = lookup(looked) { name, symbol, price in
+                dispatch_async(dispatch_get_main_queue()) {
+                    worth.append(Double(price)! * numbered)
+                    for var j :Int = 0; j < worth.count; j++ {
+                        worthAdd += worth[j]
+                    }
+                    self.walletLabel.text = String(worthAdd)
+                    let total = Int(worthAdd) + currentCash
+                    self.totalLabel.text = String(total)
+                }
+            }
         }
     }
 
