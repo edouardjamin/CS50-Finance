@@ -30,6 +30,9 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
         case size = 0
     }
     
+    // prototype
+    var sharePrice :Double = 0
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,6 +70,7 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
         
         _ = price(shareSelected) { price in
             dispatch_async(dispatch_get_main_queue()) {
+                self.sharePrice = price
                 let worthInt = price * number
                 let worth = String(worthInt)
                 self.sharesLabel.text = "$\(worth)"
@@ -133,6 +137,10 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
                         
                         let managedObject = fetchResults[0]
                         managedObject.setValue(ownedShares - Int(sharesSell)!, forKey: "shares")
+                        
+                        // update cash
+                        let earned = Double(Int(sharesSell)!) * sharePrice
+                        earn(earned)
                         
                         do {
                             try context.save()

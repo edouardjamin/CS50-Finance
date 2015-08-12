@@ -159,6 +159,109 @@ func connectToCoreData() -> NSManagedObjectContext
     return context
 }
 
+func earn(amount :Double) -> Void
+{
+    let context = connectToCoreData()
+    
+    let request = NSFetchRequest(entityName: "Users")
+    request.returnsObjectsAsFaults = false
+    
+    var exist :Bool = false
+    var currentCash :Double = 0.00
+    
+    do {
+        let results = try context.executeFetchRequest(request)
+        for result in results as! [NSManagedObject] {
+            if result.valueForKey("cash") != nil {
+                exist = true
+                currentCash = result.valueForKey("cash") as! Double
+            }
+        }
+    } catch {
+        print(error)
+    }
+    
+    if exist == false
+    {
+        let newShare = NSEntityDescription.insertNewObjectForEntityForName("Users", inManagedObjectContext: context)
+        
+        newShare.setValue(amount, forKey: "cash")
+        
+        do {
+            try context.save()
+        } catch {
+            print("Unable to save")
+        }
+    }
+    
+    if exist == true
+    {
+        let fetchRequest = NSFetchRequest(entityName: "Users")
+        
+        do {
+            if let fetchResults = try context.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                if fetchResults.count != 0 {
+                    
+                    let managedObject = fetchResults[0]
+                    let newCash = currentCash + amount
+                    managedObject.setValue(newCash, forKey: "cash")
+                    
+                    do {
+                        try context.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+    }
+}
+
+func spend(amount :Double) -> Void
+{
+    let context = connectToCoreData()
+    
+    let request = NSFetchRequest(entityName: "Users")
+    request.returnsObjectsAsFaults = false
+    
+    var currentCash :Double = 0.00
+    
+    do {
+        let results = try context.executeFetchRequest(request)
+        for result in results as! [NSManagedObject] {
+            if result.valueForKey("cash") != nil {
+                currentCash = result.valueForKey("cash") as! Double
+            }
+        }
+    } catch {
+        print(error)
+    }
+    
+        let fetchRequest = NSFetchRequest(entityName: "Users")
+        
+        do {
+            if let fetchResults = try context.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
+                if fetchResults.count != 0 {
+                    
+                    let managedObject = fetchResults[0]
+                    let newCash = currentCash - amount
+                    managedObject.setValue(newCash, forKey: "cash")
+                    
+                    do {
+                        try context.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        } catch {
+            print(error)
+        }
+}
+
+
 class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var symbolField: UITextField!
@@ -169,62 +272,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var cashLabel: UILabel!
     
     @IBAction func addCash(sender: AnyObject) {
-        let context = connectToCoreData()
         
+        earn(10000)
+        
+        let context = connectToCoreData()
         let request = NSFetchRequest(entityName: "Users")
         request.returnsObjectsAsFaults = false
         
-        var exist :Bool = false
-        var currentCash :Double = 0.00
-        
-        do {
-            let results = try context.executeFetchRequest(request)
-            for result in results as! [NSManagedObject] {
-                if result.valueForKey("cash") != nil {
-                    exist = true
-                    currentCash = result.valueForKey("cash") as! Double
-                }
-            }
-        } catch {
-                print(error)
-        }
-        
-        if exist == false
-        {
-            let newShare = NSEntityDescription.insertNewObjectForEntityForName("Users", inManagedObjectContext: context)
-        
-            newShare.setValue(10000.00, forKey: "cash")
-        
-            do {
-                try context.save()
-            } catch {
-                print("Unable to save")
-            }
-        }
-        
-        if exist == true
-        {
-            let fetchRequest = NSFetchRequest(entityName: "Users")
-            
-            do {
-                if let fetchResults = try context.executeFetchRequest(fetchRequest) as? [NSManagedObject] {
-                    if fetchResults.count != 0 {
-                        
-                        let managedObject = fetchResults[0]
-                        let newCash = currentCash + 10000
-                        managedObject.setValue(newCash, forKey: "cash")
-                        
-                        do {
-                            try context.save()
-                        } catch {
-                            print(error)
-                        }
-                    }
-                }
-            } catch {
-                print(error)
-            }
-            
         do {
             let results = try context.executeFetchRequest(request)
             for result in results as! [NSManagedObject] {
@@ -232,10 +286,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
             }
         } catch {
             print(error)
-        }
-            
-            
-            
         }
     }
     
@@ -258,6 +308,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
 
     @IBAction func removeCash(sender: AnyObject) {
+        spend(10000)
+        
+        let context = connectToCoreData()
+        let request = NSFetchRequest(entityName: "Users")
+        request.returnsObjectsAsFaults = false
+        
+        do {
+            let results = try context.executeFetchRequest(request)
+            for result in results as! [NSManagedObject] {
+                cashLabel.text = String(result.valueForKey("cash")!)
+            }
+        } catch {
+            print(error)
+        }
     }
     
 

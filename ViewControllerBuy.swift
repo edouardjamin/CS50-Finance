@@ -13,6 +13,7 @@ class ViewControllerBuy: UIViewController {
     
     // protypes
     var wanted :Int = 0
+    var priceShare :Double = 0
     
     @IBOutlet weak var symbolLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
@@ -28,6 +29,8 @@ class ViewControllerBuy: UIViewController {
     @IBAction func buyButton(sender: AnyObject) {
         
         buy(shareSelected, number: wanted)
+        let spendAmount = Double(wanted) * priceShare
+        spend(spendAmount)
         self.performSegueWithIdentifier("back", sender: self)
     }
     
@@ -77,6 +80,7 @@ class ViewControllerBuy: UIViewController {
             dispatch_async(dispatch_get_main_queue()) {
                 let worthInt = price * number
                 let worth = String(worthInt)
+                self.priceShare = price
                 self.worthLabel.text = "$\(worth)"
             }
         }
