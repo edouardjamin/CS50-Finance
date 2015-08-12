@@ -27,11 +27,13 @@ class ViewControllerBuy: UIViewController {
     // buy button
     @IBAction func buyButton(sender: AnyObject) {
         
-        var price :Double = 0
-        
-        buy(shareSelected, number: wanted, price: price)
-        let spendAmount = Double(wanted) * priceShare
-        spend(spendAmount)
+        var priceShare :Double = 0
+        _ = lookup(shareSelected) { name, symbol, price in
+            dispatch_async(dispatch_get_main_queue()) {
+                priceShare = Double(price)!
+                buy(shareSelected, number: self.wanted, price: priceShare)
+            }
+        }
         
         // back to home
         self.performSegueWithIdentifier("back", sender: self)
