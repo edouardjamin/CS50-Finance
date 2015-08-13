@@ -45,18 +45,10 @@ class ViewControllerWallet: UIViewController {
     
     override func viewDidAppear(animated: Bool) {
         
-        func tabBarIsVisible() ->Bool {
-            return self.tabBarController?.tabBar.frame.origin.y < CGRectGetMaxY(self.view.frame)
-        }
-        
-        print(tabBarIsVisible())
-        
-        
         sharesArray = NSMutableArray()
         numberArray = [String]()
         
-        let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let context :NSManagedObjectContext = appDel.managedObjectContext
+        let context = connectToCoreData()
         
         let request = NSFetchRequest(entityName: "Shares")
         request.returnsObjectsAsFaults = false

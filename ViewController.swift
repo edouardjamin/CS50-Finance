@@ -70,6 +70,41 @@ func price(entry : NSString, completion: ((price :Double) -> Void)) {
     
 }
 
+func insert(type :String, symbol :String, price :Double, shares :Int) -> Void
+{
+    // define current date
+    let date = NSDate()
+    print(date)
+    
+    // connect to database
+    let context = connectToCoreData()
+    
+    let newItem = NSEntityDescription.insertNewObjectForEntityForName("History", inManagedObjectContext: context)
+    
+    newItem.setValue(symbol, forKey: "symbol")
+    newItem.setValue(price, forKey: "price")
+    newItem.setValue(type, forKey: "type")
+    newItem.setValue(shares, forKey: "shares")
+    newItem.setValue(date, forKey: "date")
+    
+    do {
+        try context.save()
+    } catch {
+        print("Unable to save")
+    }
+    
+    let request = NSFetchRequest(entityName: "History")
+    request.returnsDistinctResults = false
+    do {
+        let results = try context.executeFetchRequest(request)
+        for result in results as! [NSManagedObject] {
+            print(result.valueForKey("date"))
+        }
+    } catch {
+        print("Unable to print")
+    }
+}
+
 func buy(entry :NSString, number :Int, price :Double) -> Void
 {
     // get shares wanted
@@ -150,6 +185,7 @@ func buy(entry :NSString, number :Int, price :Double) -> Void
             print("Unable to print")
         }
         spend(price * Double(sharesNumber))
+        insert("BUY", symbol: entry as String, price: price, shares: sharesNumber)
     }
     
     // if shares owned
@@ -175,6 +211,7 @@ func buy(entry :NSString, number :Int, price :Double) -> Void
             print(error)
         }
         spend(price * Double(sharesNumber))
+        insert("BUY", symbol: entry as String, price: price, shares: sharesNumber)
     }
     
     // alert if not enough money
@@ -319,6 +356,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var totalLabel: UILabel!
     @IBAction func alertButton(sender: AnyObject) {
         alert("Alert", message: "This is an alert")
+        insert("BUY", symbol: "AAPL", price: 12.00, shares: 8)
     }
     @IBAction func addCash(sender: AnyObject) {
         

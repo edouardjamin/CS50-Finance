@@ -142,6 +142,9 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
                         let earned = Double(Int(sharesSell)!) * sharePrice
                         earn(earned)
                         
+                        // update history
+                        insert("SELL", symbol: shareSelected, price: sharePrice, shares: Int(sharesSell)!)
+                        
                         do {
                             try context.save()
                         } catch {
@@ -174,8 +177,8 @@ class ViewControllerSell: UIViewController, UIPickerViewDataSource, UIPickerView
             print(error)
         }
         
-        // return home
-        self.performSegueWithIdentifier("sellToHome", sender: self)
+        // back to previous
+        navigationController?.popViewControllerAnimated(true)
 
     
     }

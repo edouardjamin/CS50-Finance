@@ -35,8 +35,8 @@ class ViewControllerBuy: UIViewController {
             }
         }
         
-        // back to home
-        self.performSegueWithIdentifier("back", sender: self)
+        // back to previous
+        navigationController?.popViewControllerAnimated(true)
     }
     
     // back button
