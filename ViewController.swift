@@ -342,7 +342,7 @@ func alert(title :String, message :String) -> Void
 }
 
 
-class ViewController: UIViewController, UITextFieldDelegate {
+class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var symbolField: UITextField!
     
@@ -353,10 +353,85 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var walletLabel: UILabel!
     
+    
+    /**
+    * Configure Get Quote and Buy Share button
+    **/
+    
+    @IBOutlet weak var tableUp: UITableView!
+    @IBOutlet weak var menuDown: UITableView!
+    
+    var menuUpImages :[String] = ["ask", "buy"]
+    var menuUpText :[String] = ["Get a quote", "Buy share(s)"]
+    
+    var menuDownImages :[String] = ["settings"]
+    var menuDownText :[String] = ["Settings"]
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
+        if (tableView == self.tableUp) {
+            return menuUpImages.count
+        }
+        
+        if (tableView == self.menuDown) {
+            return menuDownImages.count
+        }
+        
+        return 0
+    }
+    
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    {
+        
+        var cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: "nil")
+        
+        if (tableView == self.tableUp) {
+            cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "menuUpCell")
+            
+            cell.textLabel!.text = menuUpText[indexPath.row]
+            let image : UIImage = UIImage(named: menuUpImages[indexPath.row])!
+            cell.imageView!.image = image
+            
+            return cell
+        }
+        
+        if (tableView == self.menuDown) {
+            cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "settingsCell")
+            
+            cell.textLabel!.text = menuDownText[indexPath.row]
+            let image : UIImage = UIImage(named: menuDownImages[indexPath.row])!
+            cell.imageView!.image = image
+            
+            return cell
+        }
+        
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    {
+        if (tableView == self.tableUp) {
+            
+            if (indexPath.row == 0)
+            {
+            self.performSegueWithIdentifier("getQuote", sender: self)
+            self.tableUp.deselectRowAtIndexPath(indexPath, animated: true)
+            }
+            
+            if (indexPath.row == 1)
+            {
+                self.performSegueWithIdentifier("buyShares", sender: self)
+                self.tableUp.deselectRowAtIndexPath(indexPath, animated: true)
+            }
+        }
+    }
+    
+    
+    
     @IBOutlet weak var totalLabel: UILabel!
     @IBAction func alertButton(sender: AnyObject) {
         alert("Alert", message: "This is an alert")
-        insert("BUY", symbol: "AAPL", price: 12.00, shares: 8)
     }
     @IBAction func addCash(sender: AnyObject) {
         
@@ -408,23 +483,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
             }
         } catch {
             print(error)
-        }
-    }
-    
-
-    // get quote button
-    @IBAction func getQuote(sender: AnyObject) {
-        
-        // get symbol asked
-        let symbol = symbolField.text!
-        
-        // run the function
-        _ = lookup(symbol) { name, symbol, price in
-            dispatch_async(dispatch_get_main_queue()) {
-                self.quoteLabel.text = name
-                self.symbolLabel.text = symbol
-                self.priceLabel.text = price
-            }
         }
     }
     
@@ -487,7 +545,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
         * Start of viewDidLoad
         **/
         
-        self.symbolField.delegate = self
+        let context = connectToCoreData()
+        let request = NSFetchRequest(entityName: "Users")
+        request.returnsObjectsAsFaults = false
+        
+        do {
+            let results = try context.executeFetchRequest(request)
+            for result in results as! [NSManagedObject] {
+                cashLabel.text = String(result.valueForKey("cash")!)
+            }
+        } catch {
+            print(error)
+        }
         
         
         /**
@@ -495,10 +564,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
         **/
     }
     
+    override func viewWillAppear(animated: Bool) {
+        navigationItem.title = "One"
+    }
+    
     override func viewDidAppear(animated: Bool) {
         
+        navigationItem.title = "One"
         // protype
         var currentCash :Int = 0
+        var currentCashString :String = ""
         
         // update cashLabel as soon as loaded
         let context = connectToCoreData()
@@ -509,20 +584,25 @@ class ViewController: UIViewController, UITextFieldDelegate {
             let results = try context.executeFetchRequest(fetchRequest)
             for result in results as! [NSManagedObject] {
                 currentCash = result.valueForKey("cash") as! Int
-                cashLabel.text = String(currentCash)
+                currentCashString = String(currentCash)
+                cashLabel.text = "$\(currentCashString)"
             }
         } catch {
             print(error)
         }
         
         // update walletLabel as soon as loaded
+        // access to Shares CoreData
         let requestShares = NSFetchRequest(entityName: "Shares")
         
+        // prototype
         var ownedShares = [String]()
         var manyShares = [Int]()
         var worth = [Double]()
         var worthAdd :Double = 0
         
+        
+        // create to sample array with symbol and number of shares
         do {
             let results = try context.executeFetchRequest(requestShares)
             for result in results as! [NSManagedObject] {
@@ -531,6 +611,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
             }
         } catch {
             print(error)
+        }
+        
+        // check if an array is empty
+        if ownedShares.count == 0 {
+            self.totalLabel.text = "$\(currentCashString)"
         }
         
         for var i :Int = 0; i < ownedShares.count; i++ {
@@ -543,12 +628,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     for var j :Int = 0; j < worth.count; j++ {
                         worthAdd += worth[j]
                     }
-                    self.walletLabel.text = String(worthAdd)
+                    let worthAddString = String(worthAdd)
+                    self.walletLabel.text = "$\(worthAddString)"
                     let total = Int(worthAdd) + currentCash
-                    self.totalLabel.text = String(total)
+                    let totalString = String(total)
+                    self.totalLabel.text = "$\(totalString)"
                 }
             }
         }
+        
     }
 
     override func didReceiveMemoryWarning() {

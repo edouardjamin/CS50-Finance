@@ -56,9 +56,9 @@ class ViewControllerHistory: UIViewController, UITableViewDelegate, UITableViewD
             let results = try context.executeFetchRequest(request)
             
             for result in results as! [NSManagedObject] {
-                self.numberArray.append(String(result.valueForKey("shares")!))
-                self.nameArray.append(result.valueForKey("symbol") as! String)
-                self.typeArray.append(result.valueForKey("type") as! String)
+                self.numberArray.insert(String(result.valueForKey("shares")!), atIndex: 0)
+                self.nameArray.insert(result.valueForKey("symbol") as! String, atIndex: 0)
+                self.typeArray.insert(result.valueForKey("type") as! String, atIndex: 0)
             }
         } catch {
             print(error)
@@ -66,7 +66,6 @@ class ViewControllerHistory: UIViewController, UITableViewDelegate, UITableViewD
         
         // reload data
         self.historyTable.reloadData()
-        print("reload!")
     }
 
     override func didReceiveMemoryWarning() {

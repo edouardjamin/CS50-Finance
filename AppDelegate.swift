@@ -17,6 +17,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // Set navigation bar tint / background colour
+        // UINavigationBar.appearance().barTintColor = UIColor.redColor()
+        
+        // Set Navigation bar Title colour
+        //UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
+        
+        /**
+        * money at launch
+        **/
+        
+        var launch :Bool = false
+        // set permanent storage
+        if NSUserDefaults.standardUserDefaults().objectForKey("launch") != nil
+        {
+            launch = NSUserDefaults.standardUserDefaults().objectForKey("launch") as! Bool
+        }
+        
+        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "launch")
+        
+        if launch == false
+        {
+            earn(1000)
+            insert("FUND", symbol: "", price: 0, shares: 0)
+        }
+
         return true
     }
 
