@@ -23,6 +23,14 @@ class ViewControllerBuy: UIViewController {
     @IBOutlet weak var sharesBuy: UILabel!
     @IBOutlet weak var worthBuy: UILabel!
     @IBOutlet weak var sharesStepper: UIStepper!
+    @IBOutlet weak var cashLabel: UILabel!
+    
+    // @todo
+    /**
+    // look for price share
+    _ = lookup(shareSelected) { name, symbol, price in
+        dispatch_asyn
+    **/
     
     // buy button
     @IBAction func buyButton(sender: AnyObject) {
@@ -31,6 +39,7 @@ class ViewControllerBuy: UIViewController {
         _ = lookup(shareSelected) { name, symbol, price in
             dispatch_async(dispatch_get_main_queue()) {
                 priceShare = Double(price)!
+                self.cashLabel.text = String(priceShare)
                 buy(shareSelected, number: self.wanted, price: priceShare)
             }
         }
@@ -48,6 +57,11 @@ class ViewControllerBuy: UIViewController {
         * Start of viewDidLoad
         **/
         super.viewDidLoad()
+        
+        // initiate labels
+        self.sharesBuy.text = "1"
+        self.sharesStepper.value = 1
+        
         
         // stepper configs
         sharesStepper.wraps = false

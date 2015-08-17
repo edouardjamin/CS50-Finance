@@ -27,8 +27,10 @@ class ViewControllerBuyMain: UIViewController {
     @IBOutlet weak var buyButton: UIButton!
     
     @IBAction func checkButton(sender: AnyObject) {
+        
         // get symbol
-        let symbol = symbolField.text!
+        let symbolUser = symbolField.text!
+        let symbol = symbolUser.uppercaseString
         shareWanted = symbol
         
         // clear textField

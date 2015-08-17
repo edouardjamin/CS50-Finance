@@ -22,7 +22,8 @@ class ViewControllerQuote: UIViewController {
     @IBAction func getQuote(sender: AnyObject) {
         
         // get symbol asked
-        let symbol = symbolField.text!
+        let symbolUser = symbolField.text!
+        let symbol = symbolUser.uppercaseString
         
         // clear textField
         self.symbolField.text = ""
@@ -34,8 +35,14 @@ class ViewControllerQuote: UIViewController {
                 self.symbolLabel.text = symbol
                 self.priceLabel.text = "$\(price)"
                 self.buyButton.setTitle("Buy some!", forState: UIControlState.Normal)
+                
+                // alert if error
+                if self.nameLabel.text == "" {
+                    alert("Error", message: "Could not find the symbol \(symbol)")
+                }
             }
         }
+        
 
         self.view.endEditing(true)
     }

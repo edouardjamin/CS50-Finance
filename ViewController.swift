@@ -32,10 +32,21 @@ func lookup(entry : NSString, completion: ((name :String, symbol :String, price 
             do {
                 let jsonResult = try NSJSONSerialization.JSONObjectWithData(urlContent, options: NSJSONReadingOptions.MutableContainers)
                 
-                name = jsonResult["name"] as! String
-                symbol = jsonResult["symbol"] as! String
-                price = jsonResult["price"]!!.stringValue as String
-                completion(name: name, symbol: symbol, price: price)
+                // check if error
+                if jsonResult["name"] is  NSNull
+                {
+                    name = ""
+                    symbol = ""
+                    price = ""
+                    completion(name: name, symbol: symbol, price: price)
+                }
+                else
+                {
+                    name = jsonResult["name"] as! String
+                    symbol = jsonResult["symbol"] as! String
+                    price = jsonResult["price"]!!.stringValue as String
+                    completion(name: name, symbol: symbol, price: price)
+                }
             } catch {
                 print(error)
             }
@@ -44,6 +55,7 @@ func lookup(entry : NSString, completion: ((name :String, symbol :String, price 
     
     // run the task
     task.resume()
+
 }
 
 func price(entry : NSString, completion: ((price :Double) -> Void)) {
@@ -91,17 +103,6 @@ func insert(type :String, symbol :String, price :Double, shares :Int) -> Void
         try context.save()
     } catch {
         print("Unable to save")
-    }
-    
-    let request = NSFetchRequest(entityName: "History")
-    request.returnsDistinctResults = false
-    do {
-        let results = try context.executeFetchRequest(request)
-        for result in results as! [NSManagedObject] {
-            print(result.valueForKey("date"))
-        }
-    } catch {
-        print("Unable to print")
     }
 }
 
