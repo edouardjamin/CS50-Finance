@@ -44,7 +44,7 @@ class ViewControllerBuyMain: UIViewController {
                 
                 // update priceLabel for the first time
                 let worthInt = self.priceShare * Double(self.numberWanted)
-                self.priceLabel.text = String(worthInt)
+                self.priceLabel.text = String(format: "%.2f", worthInt)
             }
         }
         
@@ -85,7 +85,7 @@ class ViewControllerBuyMain: UIViewController {
             
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
-                    let currentCash = String(result.valueForKey("cash")!)
+                    let currentCash = String(format: "%.2f", result.valueForKey("cash") as! Double)
                     self.cashLabel.text = "$\(currentCash) available"
                 }
             }
@@ -98,10 +98,20 @@ class ViewControllerBuyMain: UIViewController {
     }
 
     @IBAction func buyButton(sender: AnyObject) {
-        buy(shareWanted, number: numberWanted, price: priceShare)
         
-        // back to previous
-        navigationController?.popViewControllerAnimated(true)
+        // check if 0
+        if numberWanted == 0
+        {
+            alert("Cannot buy", message: "You need to buy at least 1 share")
+        }
+        else
+        {
+            buy(shareWanted, number: numberWanted, price: priceShare)
+            
+            // back to previous
+            navigationController?.popViewControllerAnimated(true)
+        }
+        
     }
     override func viewDidLoad() {
         super.viewDidLoad()

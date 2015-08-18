@@ -24,8 +24,11 @@ func lookup(entry : NSString, completion: ((name :String, symbol :String, price 
     var symbol = String()
     var price = String()
     
+    // check if entry have space
+    let entrySpaceless = entry.stringByReplacingOccurrencesOfString(" ", withString: "")
+    
     // define URL
-    let url = NSURL(string: "http://yahoojson.gobu.fr/symbol.php?symbol=\(entry)")!
+    let url = NSURL(string: "http://yahoojson.gobu.fr/symbol.php?symbol=\(entrySpaceless)")!
     
     let task = NSURLSession.sharedSession().dataTaskWithURL(url) { (data, response, error) in
         if let urlContent = data {
@@ -86,7 +89,6 @@ func insert(type :String, symbol :String, price :Double, shares :Int) -> Void
 {
     // define current date
     let date = NSDate()
-    print(date)
     
     // connect to database
     let context = connectToCoreData()
@@ -431,101 +433,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
     
     
     @IBOutlet weak var totalLabel: UILabel!
-    @IBAction func alertButton(sender: AnyObject) {
-        alert("Alert", message: "This is an alert")
-    }
-    @IBAction func addCash(sender: AnyObject) {
-        
-        earn(1000)
-        
-        let context = connectToCoreData()
-        let request = NSFetchRequest(entityName: "Users")
-        request.returnsObjectsAsFaults = false
-        
-        do {
-            let results = try context.executeFetchRequest(request)
-            for result in results as! [NSManagedObject] {
-                    cashLabel.text = String(result.valueForKey("cash")!)
-            }
-        } catch {
-            print(error)
-        }
-    }
-    
-    @IBAction func printCash(sender: AnyObject) {
-        
-        let context = connectToCoreData()
-        
-        let fetchRequest = NSFetchRequest(entityName: "Users")
-        fetchRequest.returnsObjectsAsFaults = false
-        
-        do {
-            let results = try context.executeFetchRequest(fetchRequest)
-            for result in results as! [NSManagedObject] {
-                print(result.valueForKey("cash")!)
-            }
-        } catch {
-            print(error)
-        }
-    }
-    
 
-    @IBAction func removeCash(sender: AnyObject) {
-        spend(1000)
-        
-        let context = connectToCoreData()
-        let request = NSFetchRequest(entityName: "Users")
-        request.returnsObjectsAsFaults = false
-        
-        do {
-            let results = try context.executeFetchRequest(request)
-            for result in results as! [NSManagedObject] {
-                cashLabel.text = String(result.valueForKey("cash")!)
-            }
-        } catch {
-            print(error)
-        }
-    }
-    
-    // buy 1 button
-    @IBAction func buyButton(sender: AnyObject) {
-        
-        // get wanted symbol
-        let symbol = symbolField.text!
-        
-        // get price of share
-        var priceShare :Double = 0
-        _ = lookup(symbol) { name, symbol, price in
-            dispatch_async(dispatch_get_main_queue()) {
-                priceShare = Double(price)!
-                buy(symbol, number: 1, price: priceShare)
-            }
-        }
-        
-        
-            }
-    
-    @IBAction func printButton(sender: AnyObject) {
-        let appDel :AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
-        let context :NSManagedObjectContext = appDel.managedObjectContext
-        
-        let request = NSFetchRequest(entityName: "Shares")
-        request.returnsObjectsAsFaults = false
-        do {
-            let results = try context.executeFetchRequest(request)
-            
-            if results.count > 0 {
-                
-                for result in results as! [NSManagedObject] {
-                    print(result.valueForKey("shares")!)
-                    print(result.valueForKey("symbol")!)
-                }
-            }
-        } catch {
-            print("Unable to print")
-        }
-    }
     
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -565,13 +473,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
         **/
     }
     
-    override func viewWillAppear(animated: Bool) {
-        navigationItem.title = "One"
-    }
-    
     override func viewDidAppear(animated: Bool) {
         
-        navigationItem.title = "One"
         // protype
         var currentCash :Int = 0
         var currentCashString :String = ""
@@ -585,7 +488,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
             let results = try context.executeFetchRequest(fetchRequest)
             for result in results as! [NSManagedObject] {
                 currentCash = result.valueForKey("cash") as! Int
-                currentCashString = String(currentCash)
+                currentCashString = String(format: "%.2d", currentCash)
                 cashLabel.text = "$\(currentCashString)"
             }
         } catch {
@@ -603,7 +506,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
         var worthAdd :Double = 0
         
         
-        // create to sample array with symbol and number of shares
+        // create a sample array with symbol and number of shares
         do {
             let results = try context.executeFetchRequest(requestShares)
             for result in results as! [NSManagedObject] {
@@ -626,18 +529,21 @@ class ViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate
             _ = lookup(looked) { name, symbol, price in
                 dispatch_async(dispatch_get_main_queue()) {
                     worth.append(Double(price)! * numbered)
-                    for var j :Int = 0; j < worth.count; j++ {
-                        worthAdd += worth[j]
+                    
+                    if worth.count == ownedShares.count {
+                        for var j :Int = 0; j < worth.count; j++ {
+                            worthAdd += worth[j]
+                        }
+                        let worthAddString = String(format: "%.2f", worthAdd)
+                        self.walletLabel.text = "$\(worthAddString)"
+                        let total :Double = worthAdd + Double(currentCash)
+                        let totalString = String(format: "%.2f", total)
+                        self.totalLabel.text = "$\(totalString)"
                     }
-                    let worthAddString = String(worthAdd)
-                    self.walletLabel.text = "$\(worthAddString)"
-                    let total = Int(worthAdd) + currentCash
-                    let totalString = String(total)
-                    self.totalLabel.text = "$\(totalString)"
+                    
                 }
             }
         }
-        
     }
 
     override func didReceiveMemoryWarning() {

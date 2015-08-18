@@ -23,22 +23,22 @@ class ViewControllerQuote: UIViewController {
         
         // get symbol asked
         let symbolUser = symbolField.text!
-        let symbol = symbolUser.uppercaseString
+        let symbolEnter = symbolUser.uppercaseString
         
         // clear textField
         self.symbolField.text = ""
         
         // run the function
-        _ = lookup(symbol) { name, symbol, price in
+        _ = lookup(symbolEnter) { name, symbol, price in
             dispatch_async(dispatch_get_main_queue()) {
                 self.nameLabel.text = name
                 self.symbolLabel.text = symbol
                 self.priceLabel.text = "$\(price)"
-                self.buyButton.setTitle("Buy some!", forState: UIControlState.Normal)
+
                 
                 // alert if error
                 if self.nameLabel.text == "" {
-                    alert("Error", message: "Could not find the symbol \(symbol)")
+                    alert("Error", message: "Could not find the symbol \(symbolEnter)")
                 }
             }
         }
@@ -47,9 +47,6 @@ class ViewControllerQuote: UIViewController {
         self.view.endEditing(true)
     }
     
-    // buy some button
-    @IBAction func buyButton(sender: AnyObject) {
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,7 +55,6 @@ class ViewControllerQuote: UIViewController {
         self.nameLabel.text = ""
         self.symbolLabel.text = ""
         self.priceLabel.text = ""
-        self.buyButton.setTitle("", forState: UIControlState.Normal)
         
         // Do any additional setup after loading the view.
     }

@@ -14,6 +14,7 @@ class ViewControllerBuy: UIViewController {
     // protypes
     var wanted :Int = 0
     var priceShare :Double = 0
+    var number :Int = 0 // (number = number of shares owned)
     
     // interface protype
     @IBOutlet weak var symbolLabel: UILabel!
@@ -25,12 +26,6 @@ class ViewControllerBuy: UIViewController {
     @IBOutlet weak var sharesStepper: UIStepper!
     @IBOutlet weak var cashLabel: UILabel!
     
-    // @todo
-    /**
-    // look for price share
-    _ = lookup(shareSelected) { name, symbol, price in
-        dispatch_asyn
-    **/
     
     // buy button
     @IBAction func buyButton(sender: AnyObject) {
@@ -39,7 +34,7 @@ class ViewControllerBuy: UIViewController {
         _ = lookup(shareSelected) { name, symbol, price in
             dispatch_async(dispatch_get_main_queue()) {
                 priceShare = Double(price)!
-                self.cashLabel.text = String(priceShare)
+                self.cashLabel.text = "$/(String(priceShare))"
                 buy(shareSelected, number: self.wanted, price: priceShare)
             }
         }
@@ -58,9 +53,34 @@ class ViewControllerBuy: UIViewController {
         **/
         super.viewDidLoad()
         
+        // look for price share
+        _ = price(shareSelected) { price in
+            dispatch_async(dispatch_get_main_queue()) {
+                self.priceShare = price
+            }
+        }
+        
         // initiate labels
         self.sharesBuy.text = "1"
         self.sharesStepper.value = 1
+        self.worthBuy.text = "for $0"
+        
+        // update cashLabel
+        let context = connectToCoreData()
+        let requestCash = NSFetchRequest(entityName: "Users")
+        requestCash.returnsObjectsAsFaults = false
+        
+        do {
+            let results = try context.executeFetchRequest(requestCash)
+            
+            for result in results as! [NSManagedObject] {
+                let currentCash = result.valueForKey("cash") as! Double
+                let currentCashString = String(format: "%.2f", currentCash)
+                self.cashLabel.text = "$\(currentCashString) available"
+            }
+        } catch {
+            print(error)
+        }
         
         
         // stepper configs
@@ -77,12 +97,9 @@ class ViewControllerBuy: UIViewController {
         }
         
         // connect to Shares Entity
-        let context = connectToCoreData()
         let request = NSFetchRequest(entityName: "Shares")
         request.returnsObjectsAsFaults = false
         
-        // protype (number = number of shares owned)
-        var number :Double = 0.00
         
         // update sharesLabel
         do {
@@ -91,8 +108,8 @@ class ViewControllerBuy: UIViewController {
             if results.count > 0 {
                 for result in results as! [NSManagedObject] {
                     if result.valueForKey("symbol") as! String == shareSelected {
-                        number = result.valueForKey("shares")! as! Double
-                        self.sharesLabel.text = String(Int(number))
+                        number = result.valueForKey("shares")! as! Int
+                        self.sharesLabel.text = String(number)
                     }
                 }
             }
@@ -103,8 +120,8 @@ class ViewControllerBuy: UIViewController {
         // run price() and update worthLabel
         _ = price(shareSelected) { price in
             dispatch_async(dispatch_get_main_queue()) {
-                let worthInt = price * number
-                let worth = String(worthInt)
+                let worthInt :Double = price * Double(self.number)
+                let worth = String(format: "%.2f", worthInt)
                 self.priceShare = price
                 self.worthLabel.text = "$\(worth)"
             }
@@ -118,14 +135,14 @@ class ViewControllerBuy: UIViewController {
     // check stepper change
     @IBAction func stepperChanged(sender: UIStepper) {
         
-        self.sharesBuy.text = Int(sender.value).description
         wanted = Int(sender.value)
-        _ = price(shareSelected) { price in
-            dispatch_async(dispatch_get_main_queue()) {
-                let worthInt = Int(price) * self.wanted
-                self.worthBuy.text = String(worthInt)
-            }
-        }
+        self.sharesBuy.text = String(wanted)
+        let wantedWorth = String(format: "%.2f", Double(wanted) * priceShare)
+        self.worthBuy.text = "for $\(wantedWorth)"
+        let nextNumber = self.number + wanted
+        self.sharesLabel.text = String(nextNumber)
+        let nextNumberWorth = String(format: "%.2f", Double(nextNumber) * priceShare)
+        self.worthLabel.text = "$\(nextNumberWorth)"
     }
 
     override func didReceiveMemoryWarning() {

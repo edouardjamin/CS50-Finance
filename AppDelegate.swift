@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if launch == false
         {
-            earn(1000)
+            earn(10000)
             insert("FUND", symbol: "", price: 0, shares: 0)
         }
 
